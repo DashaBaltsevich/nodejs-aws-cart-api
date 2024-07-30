@@ -10,7 +10,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 
-import { BasicAuthGuard, JwtAuthGuard } from '../auth';
+import { BasicAuthGuard } from '../auth';
 import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 
@@ -53,7 +53,7 @@ export class CartController {
             ...cart,
             items: cartItems,
           },
-          // total: calculateCartTotal(cart),
+          total: calculateCartTotal(cartItems),
         },
       };
     } catch (e) {
@@ -65,83 +65,116 @@ export class CartController {
   @UseGuards(BasicAuthGuard)
   @Put()
   async updateUserCart(@Req() req: AppRequest, @Body() body) {
-    const updateCartDto = plainToInstance(UpdateCartDto, body);
-    console.log('dto', updateCartDto);
-    const errors = await validate(updateCartDto);
+    try {
+      const updateCartDto = plainToInstance(UpdateCartDto, body);
+      console.log('dto', updateCartDto);
+      const errors = await validate(updateCartDto);
 
-    if (errors.length > 0) {
-      throw new Error('Validation failed');
+      if (errors.length > 0) {
+        console.log('error', errors);
+        throw new Error('Validation failed');
+      }
+
+      const userId = getUserIdFromRequest(req);
+      console.log(
+        'userId from getUserIdFromRequest in file cart controller',
+        userId,
+      );
+
+      console.log(JSON.stringify(body));
+      const cart = await this.cartService.updateByUserId(
+        getUserIdFromRequest(req),
+        updateCartDto,
+      );
+
+      const cartItems = await this.cartService.findItemsByCartId(cart.id);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'OK',
+        data: {
+          cart,
+          total: calculateCartTotal(cartItems),
+        },
+      };
+    } catch (e) {
+      console.log(e);
     }
-
-    console.log(JSON.stringify(body));
-    const cart = await this.cartService.updateByUserId(
-      getUserIdFromRequest(req),
-      updateCartDto,
-    );
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: {
-        cart,
-        // total: calculateCartTotal(cart),
-      },
-    };
   }
 
   // @UseGuards(JwtAuthGuard)
   @UseGuards(BasicAuthGuard)
   @Delete()
   async clearUserCart(@Req() req: AppRequest) {
-    await this.cartService.removeByUserId(getUserIdFromRequest(req));
+    try {
+      await this.cartService.removeByUserId(getUserIdFromRequest(req));
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-    };
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'OK',
+      };
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   // @UseGuards(JwtAuthGuard)
   @UseGuards(BasicAuthGuard)
   @Post('checkout')
-  async checkout(
-    @Req() req: AppRequest,
-    @Body() body,
-    checkoutDto: CheckoutDto,
-  ) {
-    console.log('checkoutDto', checkoutDto);
-    const userId = getUserIdFromRequest(req);
-    const cart = await this.cartService.findByUserId(userId);
-    const cartItems = await this.cartService.findItemsByCartId(cart.id);
+  async checkout(@Req() req: AppRequest, @Body() body) {
+    try {
+      const checkoutDto = plainToInstance(CheckoutDto, body);
+      const errors = await validate(checkoutDto);
+      if (errors.length > 0) {
+        console.log('valid err', errors);
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Validation failed',
+          errors: errors.map((err) => err.toString()),
+        };
+      }
+      console.log('checkoutDto', checkoutDto);
+      const userId = getUserIdFromRequest(req);
+      const cart = await this.cartService.findByUserId(userId);
+      const cartItems = await this.cartService.findItemsByCartId(cart.id);
 
-    console.log('cartId', cart.id);
-    console.log(cartItems, JSON.stringify(cartItems));
+      console.log('cartId', cart.id);
+      console.log(cartItems, JSON.stringify(cartItems));
 
-    if (!(cart && cart.items.length)) {
-      const statusCode = HttpStatus.BAD_REQUEST;
-      req.statusCode = statusCode;
+      if (!cart) {
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Cart not found',
+        };
+      }
+
+      if (!cartItems || cartItems.length === 0) {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Cart is empty',
+        };
+      }
+
+      // const { id: cartId } = cart;
+      const total = calculateCartTotal(cartItems);
+      const order = await this.orderService.create({
+        ...checkoutDto,
+        user_id: userId,
+        cart_id: cart.id,
+        total,
+      });
 
       return {
-        statusCode,
-        message: 'Cart is empty',
+        statusCode: HttpStatus.OK,
+        message: 'OK',
+        data: { order },
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Custom Internal server error',
       };
     }
-
-    const { id: cartId } = cart;
-    // const total = calculateCartTotal(cart);
-    const order = await this.orderService.create({
-      ...checkoutDto,
-      userId,
-      cartId,
-      status: CartStatuses.ORDERED,
-      total: cartItems.length,
-    });
-    this.cartService.removeByUserId(userId);
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: { order },
-    };
   }
 }

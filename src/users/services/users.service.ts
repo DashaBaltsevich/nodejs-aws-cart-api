@@ -15,15 +15,20 @@ export class UsersService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
-  async findOne(id: string) {
-    return await this.userRepository.findOneBy({ id });
+  async findOne(name: string) {
+    return await this.userRepository.findOne({ where: { name } });
   }
 
   async createOne({ name, password }: UserDto) {
-    const id = v4();
-    const newUser = this.userRepository.create({ id, name, password });
-    console.log('newUser', newUser);
-    const user = await this.userRepository.save(newUser);
+    // const id = v4();
+    // const newUser = this.userRepository.create({ id, name, password });
+
+    const user = await this.userRepository.save({
+      name,
+      password,
+    });
+
+    console.log('newUser', user);
 
     return user;
   }

@@ -1,10 +1,15 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 export class DeliveryDto {
   @IsString()
-  @IsNotEmpty()
-  type: string;
+  @IsOptional()
+  type?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -15,6 +20,14 @@ export class PaymentDto {
   @IsString()
   @IsNotEmpty()
   type: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  creditCard?: string;
 }
 
 export class CheckoutDto {

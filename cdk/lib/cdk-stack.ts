@@ -5,7 +5,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as path from 'path';
 require('dotenv').config();
 
-export class CartStack extends cdk.Stack {
+export class CartStackNew extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -19,7 +19,7 @@ export class CartStack extends cdk.Stack {
 
     console.log('Environments:', environment);
 
-    const cartLambda = new lambda.Function(this, 'CartApiLambda', {
+    const cartLambda = new lambda.Function(this, 'CartApiLambdaNew', {
       code: lambda.Code.fromAsset(path.join(__dirname, '..', '..', 'dist')),
       handler: 'main.handler',
       timeout: cdk.Duration.seconds(300),
@@ -27,7 +27,7 @@ export class CartStack extends cdk.Stack {
       environment: environment,
     });
 
-    const api = new apigateway.LambdaRestApi(this, 'CartApi', {
+    const api = new apigateway.LambdaRestApi(this, 'CartApiNew', {
       handler: cartLambda,
       proxy: true,
       cloudWatchRole: true,
@@ -38,7 +38,7 @@ export class CartStack extends cdk.Stack {
       },
     });
 
-    new cdk.CfnOutput(this, 'CartUrl', {
+    new cdk.CfnOutput(this, 'CartUrlNew', {
       value: api.url,
     });
   }

@@ -10,6 +10,9 @@ export class CartItemEntity {
   @PrimaryColumn('uuid')
   product_id: string;
 
+  @Column({ type: 'int', nullable: false })
+  price: number;
+
   @Column({ type: 'int' })
   count: number;
 

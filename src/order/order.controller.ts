@@ -7,6 +7,17 @@ export class OrderController {
   constructor(private orderService: OrderService) {}
 
   @Get()
+  async findAll() {
+    const orders = await this.orderService.findAll();
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'OK',
+      data: orders,
+    };
+  }
+  
+  @Get()
   async findByOrderId(@Req() req: AppRequest) {
     const order = await this.orderService.findById(getOrderIdFromRequest(req));
     return {

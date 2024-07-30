@@ -4,9 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CartEntity } from './cart.entity';
+import { UserEntity } from './user.entity';
 
 @Entity({ name: 'orders' })
 export class OrderEntity {
@@ -42,18 +44,18 @@ export class OrderEntity {
   })
   status: CartStatuses;
 
-  @Column('int')
+  @Column('int',{ nullable: true})
   total: number;
 
   // @ManyToOne(() => CartEntity, (cart) => cart.orders)
   // @JoinColumn({ name: 'cart_id' })
   // cart: CartEntity;
 
-  //   @ManyToOne(() => UserEntity, (user) => user.orders)
-  //   @JoinColumn({ name: 'user_id' })
-  //   user: UserEntity;
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: UserEntity;
 
-  @ManyToOne(() => CartEntity, (cart) => cart.orders)
+  @OneToOne(() => CartEntity)
   @JoinColumn({ name: 'cart_id', referencedColumnName: 'id' })
   cart: CartEntity;
 }

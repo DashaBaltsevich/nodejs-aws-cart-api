@@ -6,11 +6,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { CartItemEntity } from './cart-item.entity';
 import { CartStatuses } from '../../cart/models';
 import { OrderEntity } from './order.entity';
-// import { OrderEntity } from './order.entity';
+import { UserEntity } from './user.entity';
 
 @Entity({ name: 'carts' })
 export class CartEntity {
@@ -36,6 +37,10 @@ export class CartEntity {
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart)
   items: CartItemEntity[];
 
-  @OneToMany(() => OrderEntity, (order) => order.cart)
-  orders: OrderEntity[];
+  // @OneToMany(() => OrderEntity, (order) => order.cart)
+  // orders: OrderEntity[];
+
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: UserEntity;
 }
