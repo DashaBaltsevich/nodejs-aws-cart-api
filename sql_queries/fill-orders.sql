@@ -1,0 +1,2 @@
+INSERT INTO orders (id, user_id, cart_id, payment, delivery, comments, status, total) values 
+	( uuid_generate_v4(), 'd4ada1cd-2438-4ad6-951c-b170b95674c2', '65e84a41-7ad5-4afc-81e5-7de79ed269bd', '{"type": "paytype"}', '{"type": "deliver type", "address": "address"}', 'comment', 'OPEN', 10)
