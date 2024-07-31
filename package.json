@@ -19,7 +19,14 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "init-eb": "eb init -r eu-central-1 --profile admin", 
+    "deploy": "eb deploy",                   
+    "status": "eb status",                
+    "open": "eb open",                  
+    "logs": "eb logs",                 
+    "terminate": "eb terminate --all --force",
+    "docker:build": "docker build -t cart-api ."
   },
   "dependencies": {
     "@codegenie/serverless-express": "^4.14.1",

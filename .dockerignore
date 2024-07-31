@@ -1,0 +1,44 @@
+cdk
+dist
+node_modules
+webpack.config.js
+sql_queries
+**/**/*.spec.ts
+test
+.env*
+README.md
+.gitignore
+.eslintrc.js
+.prettierrc
+.dockerignore
+.git
+.elasticbeanstalk/*
+npm-debug.log
+
+# Dependencies is installed on the Setup stage
+/node_modules
+
+# App is built on the Build stage
+/dist
+
+# AWS CDK files isn't used with AWS Beanstalk deploy
+cdk
+webpack.cdk.js
+src/main-lambda-handler.ts
+
+# SQL scripts and tests aren't used in the app runtime
+scripts
+**/**/*.spec.ts
+test
+
+# envs, readme and dev configs aren't used in the app runtime
+.env*
+README.md
+.gitignore
+.eslintrc.js
+.prettierrc
+.dockerignore
+.git
+
+# AWS Elastic Beanstalk config is only needed for cloud delivery
+.elasticbeanstalk/*
